@@ -1,8 +1,10 @@
 import React, { Component } from "react";
 import './App.css';
-
-
-
+import Modal from "./Component/Modal/Modal";
+import Searchbar from "./Component/Searchbar/Searchbar";
+import ImageGallery from "./Component/ImageGallery/ImageGallery";
+import ImageGalleryItem from "./Component/ImageGalleryItem/ImageGalleryItem";
+import Button from "./Component/Button/Button";
 // let URL = `https://pixabay.com/api/?q=${filterWord}&page=1&key=43132236-79366def8c3717e7f2673ddae&image_type=photo&orientation=horizontal&per_page=12`;
 
 
@@ -13,6 +15,7 @@ class App extends Component {
 
   state = {
     images: [],
+    imgBig: null,
     filter: JSON.parse(localStorage.getItem("filter")),
     show: false,
     more: JSON.parse(localStorage.getItem("more")),
@@ -41,13 +44,47 @@ class App extends Component {
   };
 
 
+
+  show = () => {
+
+    this.setState(
+      () => {
+        return {
+
+          show: !this.state.show,
+        };
+      },
+      () => {
+        console.log("Все працює (show)");
+      }
+    );
+  };
+
+
+
+  open = (e) => {
+    this.show();
+
+    const idToDelete = parseInt(e.target.closest("li")["id"]);
+    const newFruits = this.state.images.filter(item => {
+
+      console.log(item);
+
+      return item.id === idToDelete;
+    });
+    console.log(newFruits);
+    this.setState({ imgBig: newFruits });
+  };
+
+
+
   moreImg = () => {
-     this.setState({
+    this.setState({
       more: localStorage.getItem("more") + 6,
-     }, () => {
+    }, () => {
       localStorage.setItem("more", JSON.stringify(this.state.more));
       console.log(this.state.more);
-     });
+    });
   };
 
   // const mapItem = (e) => {
@@ -74,28 +111,28 @@ class App extends Component {
 
 
   // componentDidUpdate() {
-    // filterWord = this.state.filter;
+  // filterWord = this.state.filter;
 
-    //  setInterval(() => {
-    //   fetch(`https://pixabay.com/api/?q=${filterWord}&page=1&key=43132236-79366def8c3717e7f2673ddae&image_type=photo&orientation=horizontal&per_page=12`)
-    //       .then(data =>
-    //         data.json()
+  //  setInterval(() => {
+  //   fetch(`https://pixabay.com/api/?q=${filterWord}&page=1&key=43132236-79366def8c3717e7f2673ddae&image_type=photo&orientation=horizontal&per_page=12`)
+  //       .then(data =>
+  //         data.json()
 
-    //       ).then(
-    //         data =>
-    //           // console.log(data)
-    //           this.setState(
+  //       ).then(
+  //         data =>
+  //           // console.log(data)
+  //           this.setState(
 
-    //             { images: data.hits }
+  //             { images: data.hits }
 
-    //           )
-    //       ).catch(error =>
-    //         console.log(error)
-    //       );
-    // }, 1500);
-    //  setTimeout(()=> {
-    //   clearInterval(filterImg)
-    //  }, 1100)
+  //           )
+  //       ).catch(error =>
+  //         console.log(error)
+  //       );
+  // }, 1500);
+  //  setTimeout(()=> {
+  //   clearInterval(filterImg)
+  //  }, 1100)
   // };
 
 
@@ -103,42 +140,32 @@ class App extends Component {
     console.log(this.state.images);
     return (
       <>
-        <header className="searchbar">
-          <form className="form" onSubmit={this.filterUrl}>
-            <button type="submit" className="button">
-              <span className="button-label">Search</span>
-            </button>
-
-            <input
-              name="wordFilter"
-              className="input"
-              type="text"
-              autoComplete="off"
-              autoFocus
-              placeholder="Search images and photos"
-            />
-          </form>
-        </header>
+        <Searchbar filter={this.filterUrl} />
 
 
 
-        <ul className="gallery">
-          {this.state.images.map(image => {
+        <ImageGallery item={
+          this.state.images.map(image => {
             return (
               <>
-                <li className="gallery-item" key={image.id}>
-                  <img src={image.webformatURL} alt={image.tags} />
-                </li>
+                <ImageGalleryItem src={image.webformatURL} alt={image.tags} open={this.open} id={image.id}/>
               </>
             );
-          })}
-        </ul>
+          })
+        }>
+
+        </ImageGallery>
 
 
-<div>
-  <button type="button" onClick={this.moreImg}>More</button>
-</div>
+       
+          <Button  onClick={this.moreImg}></Button>
+        
 
+
+        {this.state.show ?
+          <Modal imge={this.state.imgBig} hide={this.show}></Modal>
+          : console.log("Hide")
+        }
       </>
     );
   }
